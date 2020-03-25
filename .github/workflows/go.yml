@@ -24,6 +24,7 @@ jobs:
 
     - name: Pre-CI checks
       run: |
+        export PATH=${PATH}:`go env GOPATH`/bin
         go get -u github.com/vbatts/git-validation
         go get -u github.com/kunalkushwaha/ltag
         pushd ..; git clone https://github.com/containerd/project; popd
