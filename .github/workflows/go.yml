@@ -28,7 +28,8 @@ jobs:
         go get -u github.com/vbatts/git-validation
         go get -u github.com/kunalkushwaha/ltag
         pushd ..; git clone https://github.com/containerd/project; popd
-        DCO_VERBOSITY=-q ../project/script/validate/dco
+        RANGE=$(curl ${{ github.event.pull_request.commits_url }} | jq -r '.[0].parents[0].sha +".."+ .[-1].sha')
+        DCO_VERBOSITY="-range ${RANGE} -q" ../project/script/validate/dco
         ../project/script/validate/fileheader ../project/
 
     - name: Test
