@@ -31,6 +31,7 @@ jobs:
         GITHUB_PUSH_AFTER: ${{ github.event.push.head }}
         COMMIT_RANGE: ""
       run: |
+        cat ${GITHUB_EVENT_PATH}
         export PATH=${PATH}:`go env GOPATH`/bin
         go get -u github.com/vbatts/git-validation
         go get -u github.com/kunalkushwaha/ltag
@@ -43,7 +44,8 @@ jobs:
         else
           COMMIT_RANGE=$(curl ${GITHUB_COMMIT_URL} | jq -r '.[0].parents[0].sha +".."+ .[-1].sha')
         fi
-        git-validation -range "${COMMIT_RANGE}" -v -run DCO,short-subject,dangling-whitespace
+        echo "range: ${COMMIT_RANGE}"
+        git-validation -range "${COMMIT_RANGE}" -D -v -run DCO,short-subject,dangling-whitespace
         ../project/script/validate/fileheader ../project/
 
     - name: Test
