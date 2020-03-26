@@ -25,13 +25,23 @@ jobs:
     - name: Pre-CI checks
       env:
         GITHUB_COMMIT_URL: ${{ github.event.pull_request.commits_url }}
+        GITHUB_PUSH_BEFORE: ${{ github.event.push.before }}
+        GITHUB_PUSH_AFTER: ${{ github.event.push.head }}
+        COMMIT_RANGE: ""
       run: |
         export PATH=${PATH}:`go env GOPATH`/bin
         go get -u github.com/vbatts/git-validation
         go get -u github.com/kunalkushwaha/ltag
         pushd ..; git clone https://github.com/containerd/project; popd
-        RANGE=$(curl ${GITHUB_COMMIT_URL} | jq -r '.[0].parents[0].sha +".."+ .[-1].sha')
-        DCO_VERBOSITY="-range ${RANGE} -q" ../project/script/validate/dco
+        echo "PR commits: ${GITHUB_COMMIT_URL}"
+        echo "push before: ${GITHUB_PUSH_BEFORE}"
+        echo "push after: ${GITHUB_PUSH_AFTER}"
+        if [ -z "${GITHUB_COMMIT_URL}" ]; then
+          COMMIT_RANGE="${GITHUB_PUSH_BEFORE}..${GITHUB_PUSH_AFTER}"
+        else
+          COMMIT_RANGE=$(curl ${GITHUB_COMMIT_URL} | jq -r '.[0].parents[0].sha +".."+ .[-1].sha')
+        fi
+        git-validation -range "${COMMIT_RANGE}" -v -run DCO,short-subject,dangling-whitespace
         ../project/script/validate/fileheader ../project/
 
     - name: Test
