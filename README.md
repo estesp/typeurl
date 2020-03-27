@@ -8,7 +8,9 @@ A Go package for managing the registration, marshaling, and unmarshaling of enco
 
 This package helps when types are sent over a GRPC API and marshaled as a [protobuf.Any](https://github.com/gogo/protobuf/blob/master/protobuf/google/protobuf/any.proto).
 
-Testing
+## CI
+
+This project proudly supports GitHub Actions for CI. See the workflow in `.github`.
 
 ## Project details
 
