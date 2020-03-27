@@ -19,20 +19,36 @@ jobs:
         go-version: 1.13
       id: go
 
+    - name: Setup Go binary path
+      shell: bash
+      run: |
+        echo "::set-env name=GOPATH::${{ github.workspace }}"
+        echo "::add-path::${{ github.workspace }}/bin"
+          
     - name: Check out code
       uses: actions/checkout@v2
       with:
-       fetch-depth: 3
-      
-    - name: Pre-CI checks
+        path: src/github.com/containerd/typeurl
+        fetch-depth: 25 
+
+    - name: Checkout project
+      uses: actions/checkout@v2
+      with:
+        repository: containerd/project
+        path: src/github.com/containerd/project
+
+    - name: Install dependencies
+      env:
+        GO111MODULE: off
+      run: |
+        go get -u github.com/vbatts/git-validation
+        go get -u github.com/kunalkushwaha/ltag
+
+    - name: Check DCO/whitespace/commit message
       env:
         GITHUB_COMMIT_URL: ${{ github.event.pull_request.commits_url }}
         COMMIT_RANGE: ""
       run: |
-        export PATH=${PATH}:`go env GOPATH`/bin
-        go get -u github.com/vbatts/git-validation
-        go get -u github.com/kunalkushwaha/ltag
-        pushd ..; git clone https://github.com/containerd/project; popd
         COMMIT=$(jq -r '.after' ${GITHUB_EVENT_PATH})
         if [ -z "${GITHUB_COMMIT_URL}" ]; then
           COMMIT_RANGE=$(jq -r '.before +".."+ .after' ${GITHUB_EVENT_PATH})
@@ -40,9 +56,11 @@ jobs:
           COMMIT_RANGE=$(curl ${GITHUB_COMMIT_URL} | jq -r '.[0].parents[0].sha +".."+ .[-1].sha')
         fi
         echo "range: ${COMMIT_RANGE}"
-        git checkout "${COMMIT}"
         git-validation -range "${COMMIT_RANGE}" -D -v -run DCO,short-subject,dangling-whitespace
-        ../project/script/validate/fileheader ../project/
+
+    - name: Check file headers
+      run: ../project/script/validate/fileheader ../project/
+      working-directory: src/github.com/containerd/typeurl
 
     - name: Test
       if: success()
