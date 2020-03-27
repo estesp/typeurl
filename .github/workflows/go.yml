@@ -47,17 +47,16 @@ jobs:
     - name: Check DCO/whitespace/commit message
       env:
         GITHUB_COMMIT_URL: ${{ github.event.pull_request.commits_url }}
+        DCO_VERBOSITY: "-q"
         COMMIT_RANGE: ""
       working-directory: src/github.com/containerd/typeurl
       run: |
-        COMMIT=$(jq -r '.after' ${GITHUB_EVENT_PATH})
         if [ -z "${GITHUB_COMMIT_URL}" ]; then
           COMMIT_RANGE=$(jq -r '.before +".."+ .after' ${GITHUB_EVENT_PATH})
         else
           COMMIT_RANGE=$(curl ${GITHUB_COMMIT_URL} | jq -r '.[0].parents[0].sha +".."+ .[-1].sha')
         fi
-        echo "range: ${COMMIT_RANGE}"
-        git-validation -range "${COMMIT_RANGE}" -D -v -run DCO,short-subject,dangling-whitespace
+        TRAVIS=yes TRAVIS_COMMIT_RANGE=${COMMIT_RANGE} ../project/script/validate/dco
 
     - name: Check file headers
       run: ../project/script/validate/fileheader ../project/
