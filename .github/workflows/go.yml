@@ -63,7 +63,9 @@ jobs:
       working-directory: src/github.com/containerd/typeurl
 
     - name: Test
-      run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+      run: |
+        GO111MODULE=on go mod vendor
+        go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
     
     - name: Codecov
       run: bash <(curl -s https://codecov.io/bash)
