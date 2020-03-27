@@ -48,6 +48,7 @@ jobs:
       env:
         GITHUB_COMMIT_URL: ${{ github.event.pull_request.commits_url }}
         COMMIT_RANGE: ""
+      working-directory: src/github.com/containerd/typeurl
       run: |
         COMMIT=$(jq -r '.after' ${GITHUB_EVENT_PATH})
         if [ -z "${GITHUB_COMMIT_URL}" ]; then
@@ -63,10 +64,8 @@ jobs:
       working-directory: src/github.com/containerd/typeurl
 
     - name: Test
-      if: success()
       run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
     
     - name: Codecov
-      if: success()
       run: bash <(curl -s https://codecov.io/bash)
         
