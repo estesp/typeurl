@@ -9,8 +9,8 @@ on:
 jobs:
 
   build:
-    name: Build
-    runs-on: ubuntu-latest
+    name: Typeurl CI
+    runs-on: ubuntu-18.04
     steps:
 
     - name: Set up Go 1.13
@@ -63,10 +63,11 @@ jobs:
       working-directory: src/github.com/containerd/typeurl
 
     - name: Test
+      working-directory: src/github.com/containerd/typeurl
       run: |
-        GO111MODULE=on go mod vendor
         go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
     
     - name: Codecov
       run: bash <(curl -s https://codecov.io/bash)
+      working-directory: src/github.com/containerd/typeurl
         
