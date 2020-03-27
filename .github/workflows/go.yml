@@ -56,7 +56,7 @@ jobs:
         else
           COMMIT_RANGE=$(curl ${GITHUB_COMMIT_URL} | jq -r '.[0].parents[0].sha +".."+ .[-1].sha')
         fi
-        TRAVIS=yes TRAVIS_COMMIT_RANGE=${COMMIT_RANGE} ../project/script/validate/dco
+        TRAVIS=true TRAVIS_COMMIT_RANGE=${COMMIT_RANGE} ../project/script/validate/dco
 
     - name: Check file headers
       run: ../project/script/validate/fileheader ../project/
